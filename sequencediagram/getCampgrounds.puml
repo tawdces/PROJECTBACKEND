@@ -1,0 +1,25 @@
+@startuml GetCampgrounds
+
+header CampgroundBookingAPI Campground Sequence Diagram
+footer Page %page% of %lastpage%
+title "Get All Campgrounds (GET)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:campgrounds" as routerCampgrounds
+participant "<<controllers>>\n:campgrounds" as controllersCampgrounds
+participant "<<model>>\n:Campground" as modelCampground
+database "<<MongoDB>>\n:campgrounds" as CampgroundsDatabase
+
+client->server ++:req.get('/api/v1/campgrounds')
+server->routerCampgrounds ++:app.use('/api/v1/campgrounds',campgrounds)
+routerCampgrounds -> controllersCampgrounds ++:getCampgrounds()
+note over controllersCampgrounds: Build query with filters, sorting, pagination
+controllersCampgrounds->modelCampground ++:find(query).populate('bookings')
+modelCampground->CampgroundsDatabase ++: query with filters
+DatabaseElement --> modelCampground --: campgrounds[]
+controllersCampgrounds <-- modelCampground --:campgrounds[]
+note over controllersCampgrounds: Calculate pagination (page, limit, prev, next)
+controllersCampgrounds->client --:response (campgrounds[], pagination)
+
+@enduml
