@@ -1,0 +1,40 @@
+@startuml campground_crowfoot
+' Crow's Foot ER Diagram for campground booking system
+
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+entity User {
+    + user_id : String
+    --
+    name : String
+    telephone : String
+    email : String
+    password : String
+    role : String
+}
+
+entity Campground {
+    + campground_id : String
+    --
+    name : String
+    description : String
+    address : String
+    telephone : String
+    createdAt : Date
+    updatedAt : Date
+}
+
+entity Booking {
+    + booking_id : String
+    --
+    bookingDate : Date
+    createdAt : Date
+    updatedAt : Date
+}
+
+' Crow’s Foot Relationships
+User ||--o{ Booking : makes
+Campground ||--o{ Booking : contains
+
+@enduml

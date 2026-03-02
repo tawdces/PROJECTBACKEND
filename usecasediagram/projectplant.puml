@@ -1,0 +1,47 @@
+@startuml Campground Booking System Use Case Diagram
+left to right direction
+
+actor "Guest" as guest
+actor "Registered User" as user
+actor "Admin" as admin
+
+rectangle "Campground System" as System {
+    usecase "Register\n(name, tel, email, pwd)" as uc_register
+    usecase "Login\n(email, pwd)" as uc_login
+    usecase "Logout" as uc_logout
+    usecase "View Campground List" as uc_viewList
+    usecase "Book Campground" as uc_book
+    usecase "View My Bookings" as uc_viewOwn
+    usecase "Edit My Booking" as uc_editOwn
+    usecase "Delete My Booking" as uc_deleteOwn
+    usecase "View Any Bookings" as uc_viewAny
+    usecase "Edit Any Booking" as uc_editAny
+    usecase "Delete Any Booking" as uc_deleteAny
+}
+
+' flows from guest to user
+guest --> uc_register : becomes registered
+uc_register --> user
+
+' registered user actions
+user --> uc_login
+user --> uc_logout
+user --> uc_viewList
+user --> uc_book
+user --> uc_viewOwn
+user --> uc_editOwn
+user --> uc_deleteOwn
+
+' admin inherits and extends
+admin --> uc_login
+admin --> uc_logout
+admin --> uc_viewList
+admin --> uc_book
+admin --> uc_viewOwn
+admin --> uc_editOwn
+admin --> uc_deleteOwn
+admin --> uc_viewAny
+admin --> uc_editAny
+admin --> uc_deleteAny
+
+@enduml
