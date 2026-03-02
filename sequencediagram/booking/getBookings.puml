@@ -1,0 +1,31 @@
+@startuml GetBookings
+
+header CampgroundBookingAPI Booking Sequence Diagram
+footer Page %page% of %lastpage%
+title "Get All Bookings (GET)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<middleware>>\n:protect" as protectMiddleware
+participant "<<router>>\n:bookings" as routerBookings
+participant "<<controllers>>\n:bookings" as controllersBookings
+participant "<<model>>\n:Booking" as modelBooking
+database "<<MongoDB>>\n:bookings" as BookingsDatabase
+
+client->server ++:req.get('/api/v1/bookings')
+server->protectMiddleware ++:protect (Verify JWT)
+note over protectMiddleware: Check Authorization header/cookie
+protectMiddleware --> server --:next (user attached to req)
+server->routerBookings ++:app.use('/api/v1/bookings',bookings)
+routerBookings -> controllersBookings ++:getBookings()
+alt user.role == 'admin'
+  controllersBookings->modelBooking ++:find().populate('campground')
+else user.role == 'user'
+  controllersBookings->modelBooking ++:find({user: req.user.id}).populate('campground')
+end
+modelBooking->BookingsDatabase ++: query
+BookingsDatabase --> modelBooking --: bookings[]
+controllersBookings <-- modelBooking --:bookings[]
+controllersBookings->client --:response (bookings[])
+
+@enduml

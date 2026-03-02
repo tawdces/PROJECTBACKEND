@@ -1,0 +1,44 @@
+@startuml AddBooking
+
+header CampgroundBookingAPI Booking Sequence Diagram
+footer Page %page% of %lastpage%
+title "Add Booking (POST)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<middleware>>\n:protect" as protectMiddleware
+participant "<<router>>\n:bookings" as routerBookings
+participant "<<controllers>>\n:bookings" as controllersBookings
+participant "<<model>>\n:Booking" as modelBooking
+participant "<<model>>\n:Campground" as modelCampground
+database "<<MongoDB>>\n:bookings" as BookingsDatabase
+database "<<MongoDB>>\n:campgrounds" as CampgroundsDatabase
+
+client->server ++:req.post('/api/v1/campgrounds/:campgroundId/bookings')
+server->protectMiddleware ++:protect (Verify JWT)
+protectMiddleware --> server --:next (user attached to req)
+server->routerBookings ++:app.use('/:campgroundId/bookings',bookings)
+routerBookings -> controllersBookings ++:addBooking()
+controllersBookings->modelCampground ++:findById(campgroundId)
+modelCampground->CampgroundsDatabase ++: query
+CampgroundsDatabase --> modelCampground --: campground
+controllersBookings <-- modelCampground --:campground
+alt campground exists
+  controllersBookings->modelBooking ++:find({user: req.user.id})
+  modelBooking->BookingsDatabase ++: query
+  BookingsDatabase --> modelBooking --: existedBookings[]
+  controllersBookings <-- modelBooking --:existedBookings[]
+  alt existedBookings.length >= 3 AND user.role != 'admin'
+    controllersBookings->client --:response (error - max 3 bookings)
+  else
+    controllersBookings->modelBooking ++:create(req.body)
+    modelBooking->BookingsDatabase ++: BookingSchema
+    BookingsDatabase --> modelBooking --: booking
+    controllersBookings <-- modelBooking --:booking
+    controllersBookings->client --:response (booking)
+  end
+else campground not exists
+  controllersBookings->client --:response (error - campground not found)
+end
+
+@enduml

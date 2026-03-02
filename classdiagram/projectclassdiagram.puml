@@ -1,0 +1,74 @@
+@startuml Campground Booking System Class Diagram
+left to right direction
+package "CampgroundBookingAPI" {
+    class "<<Application>>\nCampgroundService" as CampgroundService {}
+
+    class "<<Resource>>\nCampgrounds" as ResourceCampgrounds {
+        <<GET>> +getCampgrounds():Campground
+        <<POST>> +createCampground():Campground
+    }
+
+    class "<<Resource>>\nCampground" as ResourceCampground {
+        <<GET>> +getCampground():Campground
+        <<PUT>> +updateCampground():Campground
+        <<DELETE>> +deleteCampground():void
+    }
+
+    class "<<Resource>>\nBookings" as ResourceBookings {
+        <<GET>> +getBookings():Booking
+        <<POST>> +addBooking():Booking
+    }
+
+    class "<<Resource>>\nBooking" as ResourceBooking {
+        <<GET>> +getBooking():Booking
+        <<PUT>> +updateBooking():Booking
+        <<DELETE>> +deleteBooking():void
+    }
+
+    class "<<Resource>>\nAuth" as ResourceAuth {
+        <<POST>> +register():User
+        <<POST>> +login():User
+        <<GET>> +getMe():User
+        <<GET>> +logout():void
+    }
+
+    class "<<Representation>>\nCampground" as RepresentationCampground {
+        -name
+        -address
+        -telephone
+        -bookings
+    }
+
+    class "<<Representation>>\nBooking" as RepresentationBooking {
+        -bookingDate
+        -user
+        -campground
+        -createdAt
+    }
+
+    class "<<Representation>>\nUser" as RepresentationUser {
+        -name
+        -telephone
+        -email
+        -role
+        -password
+        -resetPasswordToken
+        -resetPasswordExpire
+        -createdAt
+    }
+}
+
+CampgroundService ..> ResourceCampgrounds : "/campgrounds\n<<Path>>"
+ResourceCampgrounds ..> ResourceCampground : "/{id}\n<<Path>>"
+ResourceCampground ..> RepresentationCampground : "<<use>>"
+
+CampgroundService ..> ResourceBookings : "/bookings\n<<Path>>"
+ResourceBookings ..> ResourceBooking : "/{id}\n<<Path>>"
+ResourceBooking ..> RepresentationBooking : "<<use>>"
+
+CampgroundService ..> ResourceAuth : "/auth\n<<Path>>"
+ResourceAuth ..> RepresentationUser : "<<use>>"
+
+ResourceCampgrounds ..> ResourceBookings : "/{campgroundId}/bookings\n<<Path>>"
+
+@enduml

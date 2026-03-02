@@ -1,0 +1,38 @@
+@startuml UpdateBooking
+
+header CampgroundBookingAPI Booking Sequence Diagram
+footer Page %page% of %lastpage%
+title "Update Booking (PUT)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<middleware>>\n:protect" as protectMiddleware
+participant "<<router>>\n:bookings" as routerBookings
+participant "<<controllers>>\n:bookings" as controllersBookings
+participant "<<model>>\n:Booking" as modelBooking
+database "<<MongoDB>>\n:bookings" as BookingsDatabase
+
+client->server ++:req.put('/api/v1/bookings/:id')
+server->protectMiddleware ++:protect (Verify JWT)
+protectMiddleware --> server --:next (user attached to req)
+server->routerBookings ++:app.use('/api/v1/bookings',bookings)
+routerBookings -> controllersBookings ++:updateBooking()
+controllersBookings->modelBooking ++:findById(id)
+modelBooking->BookingsDatabase ++: query
+BookingsDatabase --> modelBooking --: booking
+controllersBookings <-- modelBooking --:booking
+alt booking exists
+  alt booking.user == req.user.id OR user.role == 'admin'
+    controllersBookings->modelBooking ++:findByIdAndUpdate(id, req.body)
+    modelBooking->BookingsDatabase ++: update
+    BookingsDatabase --> modelBooking --: updatedBooking
+    controllersBookings <-- modelBooking --:updatedBooking
+    controllersBookings->client --:response (updatedBooking)
+  else user not authorized
+    controllersBookings->client --:response (error - not authorized)
+  end
+else booking not exists
+  controllersBookings->client --:response (error - booking not found)
+end
+
+@enduml
