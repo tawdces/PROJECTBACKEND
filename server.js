@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const connectDB = require('./config/db')
+const cors = require('cors');
 
 //Load env vars
 dotenv.config({path:'./config/config.env'});
@@ -21,6 +22,11 @@ app.set('query parser', 'extended');
 
 //Body parser
 app.use(express.json());
+
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 
 //Cookie parser
 app.use(cookieParser());
