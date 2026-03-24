@@ -10,6 +10,11 @@ dotenv.config({path:'./config/config.env'});
 //Connect to database
 connectDB();
 
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 //Route files 
 const campgrounds = require('./routes/campgrounds');
 const bookings = require('./routes/bookings');
@@ -24,6 +29,21 @@ app.use(express.json());
 
 //Cookie parser
 app.use(cookieParser());
+
+//Allow browser clients on other origins (e.g. Next.js dev server)
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+    }
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+        return res.sendStatus(204);
+    }
+    next();
+});
 
 //Serve frontend static files
 app.use(express.static(path.join(__dirname, 'public')));
