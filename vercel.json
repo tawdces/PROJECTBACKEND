@@ -1,15 +1,16 @@
 {
   "version": 2,
+  "name": "campground",
   "builds": [
     {
-      "src": "app.js",
+      "src": "server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "app.js"
+      "dest": "server.js"
     }
   ]
 }
